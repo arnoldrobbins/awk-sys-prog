@@ -1,0 +1,9 @@
+rm awk-sys-prog.aux
+rm awk-sys-prog.cp
+rm awk-sys-prog.fn
+rm awk-sys-prog.ky
+rm awk-sys-prog.log
+rm awk-sys-prog.pg
+rm awk-sys-prog.toc
+rm awk-sys-prog.tp
+rm awk-sys-prog.vr

@@ -1,0 +1,895 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header (This is for running Texinfo on a region.)
+@setfilename awk-sys-prog.info
+@settitle AWK As A Major Systems Programming Language --- Revisited
+@c %**end of header (This is for running Texinfo on a region.)
+
+@set xref-automatic-section-title
+
+@c The following information should be updated here only!
+@c This sets the edition of the document.
+
+@c These apply across the board.
+@set UPDATE-MONTH August, 2013
+@set EDITION 0.9
+
+@set TITLE AWK As A Major Systems Programming Language---Revisited
+
+@iftex
+@set DOCUMENT book
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end iftex
+@ifinfo
+@set DOCUMENT Info file
+@set CHAPTER major node
+@set APPENDIX major node
+@set SECTION minor node
+@set SUBSECTION node
+@end ifinfo
+@ifhtml
+@set DOCUMENT Web page
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end ifhtml
+@ifdocbook
+@set DOCUMENT book
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end ifdocbook
+@ifplaintext
+@set DOCUMENT book
+@set CHAPTER chapter
+@set APPENDIX appendix
+@set SECTION section
+@set SUBSECTION subsection
+@end ifplaintext
+
+@c For HTML, spell out email addresses, to avoid problems with
+@c address harvesters for spammers.
+@ifhtml
+@macro EMAIL{real,spelled}
+``\spelled\''
+@end macro
+@end ifhtml
+@ifnothtml
+@macro EMAIL{real,spelled}
+@email{\real\}
+@end macro
+@end ifnothtml
+
+@c merge the function and variable indexes into the concept index
+@ifinfo
+@synindex fn cp
+@synindex vr cp
+@end ifinfo
+@iftex
+@syncodeindex fn cp
+@syncodeindex vr cp
+@end iftex
+@ifxml
+@syncodeindex fn cp
+@syncodeindex vr cp
+@end ifxml
+
+@c If "finalout" is commented out, the printed output will show
+@c black boxes that mark lines that are too long.  Thus, it is
+@c unwise to comment it out when running a master in case there are
+@c overfulls which are deemed okay.
+
+@iftex
+@finalout
+@end iftex
+
+@copying
+Copyright @copyright{} 2013
+Arnold David Robbins
+
+All Rights Reserved.
+@sp 2
+
+This is Edition @value{EDITION} of @cite{@value{TITLE}}.
+@end copying
+
+@c Uncomment this for the release.  Leaving it off saves paper
+@c during editing and review.
+@c @setchapternewpage odd
+
+@titlepage
+@title @value{TITLE}
+@subtitle @value{UPDATE-MONTH}
+@author Arnold D. Robbins
+
+@c Include the Distribution inside the titlepage environment so
+@c that headings are turned off.  Headings on and off do not work.
+
+@page
+@vskip 0pt plus 1filll
+Published by:
+@sp 1
+
+Arnold David Robbins @*
+P.O. Box 354 @*
+Nof Ayalon @*
+D.N. Shimshon 9978500 @*
+ISRAEL @*
+Email: @EMAIL{arnold@@skeeve.com,arnold AT skeeve.com} @*
+URL: @uref{http://www.skeeve.com/} @*
+
+@sp 2
+@insertcopying
+@end titlepage
+
+@chapter Introduction
+
+At the March 1991 USENIX conference, Henry Spencer presented a paper
+entitled @cite{AWK As A Major Systems Programming Language}.  In it,
+he described his experiences using the original version of @command{awk}
+to write two significant ``systems'' programs---a clone for a reasonable
+subset of the @command{nroff} formatter@footnote{The Amazingly Workable
+Formatter, @command{awf}, is available from @uref{http://awk.info/?tools/awk}.},
+and a simple parser generator.
+
+He described what @command{awk} did well, as well as what it didn't, and
+presented a list of things that @command{awk} would need to acquire
+in order to take the position of a reasonable alternative to C for
+systems programming tasks on Unix systems.
+
+In particular, @command{awk} lies about in the middle of the spectrum
+between C, which is ``close to the metal,'' and the shell, which is
+quite high-level.  A language at this level that is useful for
+doing systems programming is very desirable.
+
+This paper reviews Henry's wish list, and describes some of the events that
+have occurred in the Unix/Linux world since 1991.
+It presents a case that @command{gawk}---GNU Awk---fills most of the
+major needs Henry listed way back in 1991, and then describes the
+author's opinion as to why other languages have successfully filled the
+systems programming role which @command{awk} did not.  It ends off
+with a discussion of how the current version of @command{gawk} may
+finally be able to join the ranks of other popular, powerful, scripting
+languages in common use today.
+
+@section That Was Then @dots{}
+
+In this @value{SECTION} we review the state of the Unix world in
+1991, as well as the state of @command{awk}, and then list what Henry Spencer
+saw as missing for @command{awk}.
+
+@subsection The Unix World in 1991
+
+Undoubtedly, many readers of this paper were not using
+computers in 1991, so this @value{SUBSECTION} provides the context
+in which Henry's paper was written.  In March of 1991:
+
+@itemize @bullet
+
+@item
+Commercial Unix systems were the norm, with offerings from
+AT&T,
+Digital Equipment Corporation,
+Hewlett Packard,
+IBM,
+Sun Microsystems,
+and many others,
+all vying for market share.  Microsoft Windows existed, but was
+primarily a layer on top of MS-DOS and was not taken seriously.
+
+@item
+Very few sites still ran the original Bell Labs or direct-from-UCB
+variants of Unix; those did not keep up with the available hardware
+and AT&T was itself trying to succeed in the Unix hardware market.
+
+@item
+GNU/Linux did not exist!  Some unencumbered BSD variants were available,
+but they were still under the cloud of the AT&T/UCB law suit.@footnote{See
+the @uref{http://en.wikipedia.org/wiki/USL_v._BSDi, Wikipedia article},
+and @uref{http://cm.bell-labs.com/who/dmr/bsdi/bsdisuit.html,
+some notes at the late Dennis Ritchie's website}. There are undoubtedly
+other sources of information as well.}
+
+@item
+So-called ``new'' @command{awk} was about 2.5 years old.
+The book by Aho, Weinberger and Kernighan was published in
+October of 1987, so most people knew about new @command{awk}, but they
+just couldn't get it.
+
+Who could? New @command{awk} was available to educational institutions
+from the Bell Labs research group, and to those who had Unix source
+licenses for System V Releases 3.1, 3.2, and 4.  By this time, source
+licensees were an extremely rare breed, since the cost for commercial
+licenses had skyrocketed, and even for educational licensees it had
+increased greatly.@footnote{Especially for budget-strapped educational
+institutions, source licences were increasingly an expensive luxury,
+since SVR4 rarely ran on hardware that they had.} If I recall correctly,
+an educational license cost around US $1,000, considerably more than
+the earlier Unix licenses.
+
+@item
+PERL existed and was starting to gain in popularity. In 1991, ``PERL''
+most likely meant PERL 3 or a very early version of PERL 4.
+The World Wide Web, which was one of the major reasons for PERL's
+growth in popularity, had not yet really taken off.
+
+@item
+Other implementations of new @command{awk} were available:
+
+@itemize +
+@item
+MKS Awk for PC systems (MS-DOS).
+
+@item
+GNU Awk was available and relatively stable, but could not be
+called ``solid.''
+@end itemize
+
+@noindent
+The problem with the first of these is that source code was not
+available. And the latter came with (to quote Henry) ``troublesome licenses,''
+that is, the GNU GPL.
+
+@item
+Michael Brennan's @command{mawk} (also GPL'ed) was @emph{not} yet available.
+Version 1.0 was accepted for posting in @code{comp.sources.reviewed}
+on September 30, 1991, half a year after Henry's paper was published.
+@end itemize
+
+@subsection What Awk Lacked In 1991
+
+Here is a summary of what was wrong with the @command{awk} picture
+in 1991.  These are in the same order as presented Henry's paper.
+
+@enumerate 1
+@item
+New @command{awk} was not widely available. Most Unix vendors
+still shipped only old @command{awk}.  (Here is where he mentions that
+``the independently-available implementations either cost substantial
+amounts of money or come with troublesome [sic] licenses.'') His point then
+was that for portability, @command{awk} programs had to be restricted
+to old @command{awk}.
+
+This could be considered a quality of implementation issue, although
+it's really a ``lack of available implementation'' issue.
+
+@item
+There is no way to tell @command{awk} to start matching all its
+patterns over again against the existing @code{$0}.
+This is a language design issue.
+
+@item
+There is no array assignment.
+(Language design issue.)
+
+@item
+Getting an error message out to standard error is difficult.
+(Implementation issue.)
+
+@item
+There is no precise language specification for @command{awk}.
+This leads to gratuitous portability problems.
+This too is thus a quality of implementation issue, in that without
+a specification, it's difficult to produce uniform, high quality
+implementations.
+
+@item
+The existing widely available implementation is slow; a much
+faster implementation is needed and the best thing of all would be
+an optimizing compiler.
+(Implementation issue.)
+
+@item
+There is no @command{awk}-level debugger.
+(Support tool or quality of implementation issue.)
+
+@item
+There is no @command{awk}-level profiler.
+(Support tool or quality of implementation issue.)
+@end enumerate
+
+@section @dots{} And This Is Now
+
+Fast forward to 2013.  Where do things stand?
+
+@subsection What Awk Has Today
+
+The state of the @command{awk} world is much better now.
+In the same order:
+
+@enumerate 1
+@item
+New @command{awk} is the standard version of @command{awk}
+today on GNU/Linux, BSD, and commercial Unix systems.
+The one notable exception is Solaris, where @file{/usr/bin/awk}
+is still the old one; on all other systems, plain @command{awk}
+is some version of new @command{awk}.
+
+@item
+There remains no way to tell @command{awk} to start matching all its
+patterns over again against the existing @code{$0}.  Furthermore,
+this is a feature that has not been called for by the @command{awk}
+community, except in Henry's paper.  (We do acknowledge that this would
+be a useful feature.)
+
+@item
+There continues to be no array assignment.
+However, this function in @command{gawk}, which has arrays of arrays, can do
+the trick nicely. It is also efficient, since @command{gawk} uses
+reference counted strings internally:
+
+@example
+function copy_array(dest, source,   i, count)
+@{
+    delete dest
+
+    for (i in source) @{
+        if (isarray(source[i]))
+            count += copy_array(dest[i], source[i])
+        else @{
+            dest[i] = source[i]
+            count++
+        @}
+    @}
+
+    return count
+@}
+@end example
+
+@item
+Getting error messages out is easier. All modern systems have
+a @file{/dev/stderr} special file to which error messages
+may be sent directly.
+
+@item
+Perhaps most important of all, with the
+@uref{http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html,
+POSIX standard},
+there is a formal standard specification
+for @command{awk}. As with all formal standards, it isn't
+perfect. But it provides an excellent starting point, as well
+as chapter and verse to cite when explaining the behavior
+of a standards-compliant version of @command{awk}.
+
+@item
+There are a number of freely available implementations, with
+different licenses, such that everyone ought to be able to find
+one to suit them:
+
+@itemize @bullet
+@item
+Brian Kernighan's @command{awk} is the direct lineal
+descendant of Unix @command{awk}. He calls it the ``One
+True Awk'' (sic). It is available from
+@uref{http://www.cs.princeton.edu/~bwk, his home page},
+in several archive formats:
+
+@table @asis
+@item Shell archive:
+@uref{http://www.cs.princeton.edu/~bwk/btl.mirror/awk.shar}
+
+@item Compressed @command{tar} file:
+@uref{http://www.cs.princeton.edu/~bwk/btl.mirror/awk.tar.gz}
+
+@item Zip file:
+@uref{http://www.cs.princeton.edu/~bwk/btl.mirror/awk.zip}
+
+@item Git Hub:
+@code{git clone git://github.com/onetrueawk/awk bwkawk}
+@end table
+
+@item
+GNU Awk, @command{gawk}, is available from the Free Software Foundation.
+You may use either @command{ftp} or an HTTP downloader:
+@url{http://ftp.gnu.org/gnu/gawk/gawk-4.1.0.tar.gz} is the current
+version. There may be a newer one.
+
+@item
+Michael Brennan's @command{awk}, known as @command{mawk}.
+In 2009, Thomas Dickey took on @command{mawk} maintenance.
+Basic information is available on
+@uref{http://www.invisible-island.net/mawk, the project's web page}.
+The download URL is
+@url{http://invisible-island.net/datafiles/release/mawk.tar.gz}.
+
+@item
+MKS Awk was used for Solaris's @file{/usr/xpg4/bin/awk}, which is
+their standards-compliant version of new @command{awk}. For a while it was
+available as part of Open Solaris, but is no longer so.
+Some years ago, we were able to make this version compile and run on
+GNU/Linux after just a few hours work.
+
+Although Open Solaris is now history, the
+@uref{http://wiki.illumos.org/display/illumos/illumos+Home, Illumos project}
+does make the MKS Awk available.  You can view the files one at a time from
+@uref{https://github.com/joyent/illumos-joyent/blob/master/usr/src/cmd/awk_xpg4}.
+
+@item
+Other, more esoteric versions as well. See the
+@uref{http://en.wikipedia.org/wiki/Awk_language#Versions_and_implementations,
+Wikipedia article}, and also the
+@uref{http://www.gnu.org/software/gawk/manual/html_node/Other-Versions.html#Other-Versions,
+@command{gawk} documentation}.
+@end itemize
+
+@end enumerate
+
+@subsection And What GNU Awk Has Today
+
+The more difficult of the quality of implementation issues are addressed
+by @command{gawk}.  In particular:
+
+@enumerate 7
+@item
+Beginning with version 4.0 in 2011, @command{gawk} provides an
+@command{awk}-level debugger: @command{dgawk}, which is
+modeled after GDB.
+This is a full debugger, with breakpoints, watchpoints, single statement
+stepping and expression evaluation capabilities.
+
+@item
+@command{gawk} has provided an @command{awk}-level statement profiler for
+many years (@command{pgawk}).
+Although there is no direct correlation with CPU time used, the
+statement level profiler remains a powerful tool for understanding
+program behavior.
+@end enumerate
+
+With the 4.1 release, all three versions (@command{gawk},
+@command{pgawk}, and @command{dgawk}) are merged into a single
+executable, considerably reducing the required installation ``footprint.''
+
+While @command{gawk} has almost always been faster than Brian
+Kernighan's @command{awk}, recent performance improvements bring
+it closer to @command{mawk}'s performance level (a byte-code based
+execution engine and internal improvements in array indexing).
+
+And @command{gawk} clearly has the most features of any version,
+many of which considerably increase the power of the language.
+
+@subsection So Where Does Awk Stand?
+
+Despite all of the above, @command{gawk} is not as popular as other
+scripting languages. Since 1991, we can point to four major scripting
+languages which have enjoyed, or currently enjoy, differing levels of
+popularity: PERL, tcl/tk, Python, and Ruby.  We think it is fair to say
+that Python and Ruby are the most popular scripting languages in the
+second decade of the 21st century.
+
+Is @command{awk} now ready to compete with the other languages?
+Not quite yet.
+
+@section A Key Reason Why Other Languages Have Gained Popularity
+
+In retrospect, it seems clear (at least to us!) that @emph{the} major
+reason that all of the previously mentioned languages have enjoyed
+significant popularity is their @emph{extensibility}.
+
+One certainly cannot attribute their popularity to improved syntax.
+In the opinion of many, PERL and Ruby both suffer from terrible syntax.
+Tcl's syntax is readable but nothing special. Python's syntax is elegant,
+although slightly unusual.  The point here is that they all differ greatly
+in syntax, and none really offer the clean pattern--action paradigm
+that is @command{awk}'s trademark, yet they are all popular languages.
+
+If not syntax, then what?  We believe that their popularity stems from
+the fact that all of these languages are easily @emph{extensible}. This is true
+with both ``modules'' in the scripting language, and more importantly,
+with access to C level facilities via dynamic library loading.
+
+@command{awk}, on the other hand, has always been closed. An @command{awk}
+program cannot even change its working directory, much less open
+a connection to an SQL database or a socket to a server on the
+Internet somewhere (although @command{gawk} can do the latter).
+
+If one examines the number of extensions available for PERL on CPAN,
+or for Python such as PyQt or the Python tk bindings, it becomes
+clear that extensibility is the real key to power (and from there
+to popularity).
+
+To summarize: A reasonable language definition, efficient implementations,
+debuggers and profilers are necessary but not sufficient for true power.
+The final ingredient is @emph{extensibility}.
+
+@section Filling The Gap
+
+With version 4.1, @command{gawk} (finally) provides a defined C API
+for extending the core language.
+
+@subsection API Overview
+
+The API makes it possible to write functions in C or C++ that are
+callable from an @command{awk} program as if the function were
+written in @command{awk}.  The most straightforward way to think
+of these functions is as user-defined functions that happen to be
+implemented in a different language.
+
+The API provides the following facilities:
+
+@itemize @bullet
+@item
+Structures that map @code{awk} string, numeric, and undefined values
+into C types that can be worked with.
+
+@item
+Management of function parameters, including the ability to convert
+a parameter whose original type is undefined, into an array. That is,
+there is full call-by-reference for arrays.  Scalars are passed by
+value, of course.
+
+@item
+Access to the symbol table. Extension functions can read all @command{awk}
+variables, and create and update new variables. As an initial, relatively
+arbitrary design decision, extensions cannot update special variables such as
+@code{NR} or @code{NF}, with the single exception of @code{PROCINFO}.
+
+@item
+Full array management, including the ability to create arrays, and arrays
+of arrays, and the ability to add and delete elements from an array. It
+is also possible to ``flatten'' an array into a data structure that
+makes it simple for C code to loop over all the elements of an array.
+
+@item
+The ability to run a procedure when @command{gawk} exits. This is conceptually
+the same as the C @code{atexit()} function.
+
+@item
+Hooks into the built-in I/O redirection mechanisms in @command{gawk}.
+In particular, there are separate facilities for input redirections
+with @code{getlne} and @samp{<}, output redirections with
+@code{print} or @code{printf} and @samp{>} or @samp{>>}, and two-way
+pipelines with @command{gawk}'s @samp{|&} operator.
+
+@end itemize
+
+@subsection Discussion
+
+Considerable thought went into the design of the API.
+The @command{gawk} documentation provides a
+@uref{http://www.gnu.org/software/gawk/manual/html_node/Dynamic-Extensions.html#Dynamic-Extensions,
+full description of the API itself},
+with examples (over 50 pages worth!), as well as
+@uref{http://www.gnu.org/software/gawk/manual/html_node/Extension-Design.html#Extension-Design, some discussion of the goals and design decisions}
+behind the API (in an appendix).
+The development was done over the course of
+about a year and a half, together with the developers of @command{xgawk},
+a fork of @command{gawk} that added features that made using extensions
+easier, and included an extension for processing XML files in a way that
+fit naturally with the pattern--action paradigm.  While it may not be
+perfect, the @command{gawk} developers feel that it is a good start.
+
+The major @command{xgawk} additions to the C code base have been merged
+into @command{gawk}, and the extensions from that project have been
+rewritten to use the new API.  As a result, the @command{xgawk} project
+developers renamed their project @code{gawkextlib}, and the project now
+provides only extensions.@footnote{For more information, see the
+@uref{http://sourceforge.net/projects/gawkextlib/,
+@code{gawkextlib} project page}.}
+
+It is notable that functions written in @command{awk} can do a number
+of things that extension functions cannot, such as modify any
+variables, do I/O, call @command{awk} built-in functions,
+and call other user-defined functions.
+
+While it would certainly be possible to provide APIs for all of these
+features for extension functions, this seemed to be overkill.  Instead,
+the @command{gawk} developers took the view that extension functions
+should provide access to external facilities, and provide communication
+to the @command{awk} level via function parameters and/or global variables,
+including associative arrays, which are the only real data structure.
+
+Consider a simple example.  The standard @command{du} program
+can recursively walk one or more arbitrary file heirarchies, call
+@code{stat()} to retrieve file information, and then sum up the blocks
+used.  In the process, @command{du} must track hard links, so that no
+file is accounted for or reported more than once.
+
+The @samp{filefuncs} extension shipped with @command{gawk} provides a
+@code{stat()} function that takes a pathname and fills in an associative
+array with the information retrieved from @code{stat()}.  The array
+elements have names like @code{"size"}, @code{"mtime"} and so on, with
+corresponding appropriate values.  (Compare this to PERL's @code{stat()}
+function that returns a linearly-indexed array!)
+
+The @code{fts()} function in the @samp{filefuncs} extension builds on
+@code{stat()} to create a multidimensional array of arrays that describes
+the requested file heirarchies, with each element being an array filled
+in by @code{stat()}. Directories are arrays containing elements for each
+directory entry, with an element named @code{"."} for the array itself.
+(The manual page for the @samp{filefuncs} extension is included at the
+end of this document to make this clearer.)
+
+Given that @code{fts()} does the heavy lifting, @command{du} can be
+written quite nicely, and quite portably@footnote{The @command{awk}
+version of @command{du} works on Unix, GNU/Linux, Mac OS X, and MS
+Windows. On Windows only Cygwin is currently supported.  We hope to one
+day support MinGW also.}, in @command{awk}.  @xref{du in awk}, for the
+code, which weighs in at under 250 lines.  Much of this is comments and
+argument parsing.
+
+@subsection Future Work
+
+The extension facility is new, and undoubtedly has introduced new
+``dark corners'' into @command{gawk}.  These remain to be uncovered
+and any new bugs need to be shaken out and removed.
+
+From a language design standpoint, a big open issue is some sort of
+``module'' or more general ``namespace'' facility for @command{awk}.
+We are open to suggestions here and would welcome input from serious
+(or would-be serious) @command{gawk} users on this.
+
+@section Conclusion
+
+It has taken much longer than any @command{awk} fan would like, but finally,
+GNU Awk fills in almost all the gaps listed by Henry Spencer for
+@command{awk} to be really useful as a systems programming language.
+
+In addition, experience from other popular languages has shown that
+extensibility is a key, if not @emph{the} key, to true power,
+usability, and popularity.
+
+With the release of @command{gawk} 4.1, we feel that @command{gawk}
+(and thus the Awk language) are now on par with the basic capabilities
+of other popular languages.
+
+Is it too late in the game?
+If enough people start to write extensions for @command{gawk},
+then perhaps @command{awk} will return to the scripting language limelight.
+If not, then the @command{gawk} developers will have wasted a
+lot of time and effort. (We hope not!) Time will tell.
+
+For now though, we hope that this paper will have piqued @emph{your}
+curiosity, and that you will take the time to give @command{gawk}
+a fresh look.
+
+@node du in awk
+@appendix Awk Code For @command{du}
+
+Here is the @command{du} program, written in Awk.
+Besides demonstrating the power of the @code{stat()} and @code{fts()}
+extensions and @command{gawk}'s multidimensional arrays,
+it also shows the @code{switch} statement and the built-in
+bit manipulation functions @code{and()}, @code{or()}, and @code{compl()}.
+
+The output is not identical to GNU @command{du}'s, since filenames are
+not sorted.  However, @command{gawk}'s built-in sorting facilities
+should make sorting the output straightforward; we leave that as the
+traditional ``exercise for the reader.''
+
+@smallexample
+#! /usr/local/bin/gawk -f
+
+# du.awk --- write POSIX du utility in awk.
+# See http://pubs.opengroup.org/onlinepubs/9699919799/utilities/du.html
+#
+# Most of the heavy lifting is done by the fts() function in the "filefuncs"
+# extension.
+#
+# We think this conforms to POSIX, except for the default block size, which
+# is set to 1024. Following GNU standards, set POSIXLY_CORRECT in the
+# environment to force 512-byte blocks.
+#
+# Arnold Robbins
+# arnold@@skeeve.com
+
+@@include "getopt"
+@@load "filefuncs"
+
+BEGIN @{
+    FALSE = 0
+    TRUE = 1
+
+    BLOCK_SIZE = 1024   # Sane default for the past 30 years
+    if ("POSIXLY_CORRECT" in ENVIRON)
+        BLOCK_SIZE = 512        # POSIX default
+
+    compute_scale()
+
+    fts_flags = FTS_PHYSICAL
+    sum_only = FALSE
+    all_files = FALSE
+
+    while ((c = getopt(ARGC, ARGV, "aHkLsx")) != -1) @{
+        switch (c) @{
+        case "a":
+            # report size of all files
+            all_files = TRUE;
+            break
+        case "H":
+            # follow symbolic links named on the command line
+            fts_flags = or(fts_flags, FTS_COMFOLLOW)
+            break
+        case "k":
+            BLOCK_SIZE = 1024       # 1K block size
+            break
+        case "L":
+            # follow all symbolic links
+
+            # fts_flags &= ~FTS_PHYSICAL
+            fts_flags = and(fts_flags, compl(FTS_PHYSICAL))
+
+            # fts_flags |= FTS_LOGICAL
+            fts_flags = or(fts_flags, FTS_LOGICAL)
+            break
+        case "s":
+            # do sums only
+            sum_only = TRUE
+            break
+        case "x":
+            # don't cross filesystems
+            fts_flags = or(fts_flags, FTS_XDEV)
+            break
+        case "?":
+        default:
+            usage()
+            break
+        @}
+    @}
+
+    # if both -a and -s
+    if (all_files && sum_only)
+        usage()
+
+    for (i = 0; i < Optind; i++)
+        delete ARGV[i]
+
+    if (Optind >= ARGC) @{
+        delete ARGV     # clear all, just to be safe
+        ARGV[1] = "."   # default to current directory
+    @}
+
+    fts(ARGV, fts_flags, filedata)  # all the magic happens here
+
+    # now walk the trees
+    if (sum_only)
+        sum_walk(filedata)
+    else if (all_files)
+        all_walk(filedata)
+    else
+        top_walk(filedata)
+@}
+
+# usage --- print a message and die
+
+function usage()
+@{
+    print "usage: du [-a|-s] [-kx] [-H|-L] [file] ..." > "/dev/stderr"
+    exit 1
+@}
+
+# compute_scale --- compute the scale factor for block size calculations
+
+function compute_scale(     stat_info, blocksize)
+@{
+    stat(".", stat_info)
+
+    if (! ("devbsize" in stat_info)) @{
+        printf("du.awk: you must be using filefuncs extension from gawk 4.1.1 or later\n") > "/dev/stderr"
+        exit 1
+    @}
+
+    # Use "devbsize", which is the units for the count of blocks
+    # in "blocks".
+    blocksize = stat_info["devbsize"]
+    if (blocksize > BLOCK_SIZE)
+        SCALE = blocksize / BLOCK_SIZE
+    else    # I can't really imagine this would be true
+        SCALE = BLOCK_SIZE / blocksize
+@}
+
+# islinked --- return true if a file has been seen already
+
+function islinked(stat_info,        device, inode, ret)
+@{
+    device = stat_info["dev"]
+    inode = stat_info["ino"]
+
+    ret = ((device, inode) in Files_seen)
+
+    return ret
+@}
+
+# file_blocks --- return number of blocks if a file has not been seen yet
+
+function file_blocks(stat_info,     device, inode)
+@{
+    if (islinked(stat_info))
+        return 0
+
+    device = stat_info["dev"]
+    inode = stat_info["ino"]
+
+    Files_seen[device, inode]++
+
+    return block_count(stat_info)   # delegate actual counting
+@}
+
+# block_count --- return number of blocks from a stat() result array
+
+function block_count(stat_info,     result)
+@{
+    if ("blocks" in stat_info)
+        result = int(stat_info["blocks"] / SCALE)
+    else
+        # otherwise round up from size
+        result = int((stat_info["size"] + (BLOCK_SIZE - 1)) / BLOCK_SIZE)
+
+    return result
+@}
+
+# sum_dir --- data on a single directory
+
+function sum_dir(directory, do_print,   i, sum, count)
+@{
+    for (i in directory) @{
+        if ("." in directory[i]) @{  # directory
+            count = sum_dir(directory[i], do_print)
+            count += file_blocks(directory[i]["."])
+            if (do_print)
+                printf("%d\t%s\n", count, directory[i]["."]["path"])
+        @} else @{            # regular file
+            count = file_blocks(directory[i]["stat"])
+        @}
+        sum += count
+    @}
+
+    return sum
+@}
+
+# simple_walk --- summarize directories --- print info per parameter
+
+function simple_walk(filedata, do_print,    i, sum, path)
+@{
+    for (i in filedata) @{
+        if ("." in filedata[i]) @{   # directory
+            sum = sum_dir(filedata[i], do_print)
+            path = filedata[i]["."]["path"]
+        @} else @{            # regular file
+            sum = file_blocks(filedata[i]["stat"])
+            path = filedata[i]["path"]
+        @}
+        printf("%d\t%s\n", sum, path)
+    @}
+@}
+
+# sum_walk --- summarize directories --- print info only for the top set of directories
+
+function sum_walk(filedata)
+@{
+    simple_walk(filedata, FALSE)
+@}
+
+# top_walk --- data on the main arguments only
+
+function top_walk(filedata)
+@{
+    simple_walk(filedata, TRUE)
+@}
+
+# all_walk --- data on every file
+
+function all_walk(filedata, i, sum, count)
+@{
+    for (i in filedata) @{
+        if ("." in filedata[i]) @{   # directory
+            count = all_walk(filedata[i])
+            sum += count
+            printf("%s\t%s\n", count, filedata[i]["."]["path"])
+        @} else @{            # regular file
+            if (! islinked(filedata[i]["stat"])) @{
+                count = file_blocks(filedata[i]["stat"])
+                sum += count
+                if (i != ".")
+                    printf("%d\t%s\n", count, filedata[i]["path"])
+            @}
+        @}
+    @}
+    return sum
+@}
+@end smallexample
+
+@bye

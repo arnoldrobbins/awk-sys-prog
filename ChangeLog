@@ -1,0 +1,5 @@
+2014-08-18         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* awk-sys-prog.texi, du.awk, texinfo.tex, cleanit:
+	Initial checkin to git, although it's mostly done.
+	Last modified August 13, 2013.
