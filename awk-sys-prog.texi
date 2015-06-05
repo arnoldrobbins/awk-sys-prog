@@ -10,8 +10,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH August, 2013
-@set EDITION 0.9
+@set UPDATE-MONTH June 2015
+@set EDITION 0.95
 
 @set TITLE AWK As A Major Systems Programming Language---Revisited
 
@@ -88,7 +88,7 @@
 @end iftex
 
 @copying
-Copyright @copyright{} 2013
+Copyright @copyright{} 2013, 2015
 Arnold David Robbins
 
 All Rights Reserved.
@@ -156,6 +156,11 @@ with a discussion of how the current version of @command{gawk} may
 finally be able to join the ranks of other popular, powerful, scripting
 languages in common use today.
 
+@subheading Acknowledgements
+
+Thanks to Andrew Schorr, Henry Spencer, Nelson H.F.@: Beebe, and Brian Kernighan
+for reviewing an earlier draft of this paper.
+
 @section That Was Then @dots{}
 
 In this @value{SECTION} we review the state of the Unix world in
@@ -212,10 +217,12 @@ an educational license cost around US $1,000, considerably more than
 the earlier Unix licenses.
 
 @item
-PERL existed and was starting to gain in popularity. In 1991, ``PERL''
-most likely meant PERL 3 or a very early version of PERL 4.
-The World Wide Web, which was one of the major reasons for PERL's
-growth in popularity, had not yet really taken off.
+PERL@footnote{I've been told that one of the reasons Larry Wall created
+PERL is that he either didn't know about new @command{awk}, or couldn't
+get it.} existed and was starting to gain in popularity. In 1991,
+``PERL'' most likely meant PERL 3 or a very early version of PERL 4.
+The World Wide Web, which was one of the major reasons for PERL's growth
+in popularity, had not yet really taken off.
 
 @item
 Other implementations of new @command{awk} were available:
@@ -231,8 +238,9 @@ called ``solid.''
 
 @noindent
 The problem with the first of these is that source code was not
-available. And the latter came with (to quote Henry) ``troublesome licenses,''
-that is, the GNU GPL.
+available. And the latter came with (to quote Henry) ``troublesome licenses.''
+Henry no longer remembers whether this referred to the GPL, or to
+the Bell Labs source licenses.
 
 @item
 Michael Brennan's @command{mawk} (also GPL'ed) was @emph{not} yet available.
@@ -244,6 +252,8 @@ on September 30, 1991, half a year after Henry's paper was published.
 
 Here is a summary of what was wrong with the @command{awk} picture
 in 1991.  These are in the same order as presented Henry's paper.
+We qualify each issue in order to later discuss how it has been addressed
+over time.
 
 @enumerate 1
 @item
@@ -292,9 +302,39 @@ There is no @command{awk}-level profiler.
 (Support tool or quality of implementation issue.)
 @end enumerate
 
+In recent private email, Henry added the following items, saying
+``there are a couple more things I'd add now, in hindsight.''
+These are direct quotes:
+
+@enumerate 9
+@item
+[I can't believe I didn't discuss this in the paper, because I was
+certainly aware of it then!]  Lack of any convenient mechanism for adding
+libraries.  When @command{awk} is being invoked from a shell file, the
+shell file can do substitutions or use multiple @option{-f} options, but
+those are mechanisms outside the language, and not very convenient ones.
+What's really wanted is something like you get in Python etc., where one
+little statement up near the top says ``arrange for this program to have
+the xyz library available when it runs.''
+
+@item
+I think it was Rob Pike who later said (roughly):  ``It says something
+bad about Awk that in a language with integrated regular expressions,
+you end up using @code{substr()} so often.''  My paper did allude
+to the difficulty of finding out @emph{where} something matched in
+old-@command{awk} programs, but even in new @command{awk}, what you get
+is a number that you then have to feed to @code{substr()}.  The language
+could really use some more convenient way of dissecting a string using
+regexp matching.  [Caveat:  I have not looked lately at Gawk to see if
+it has one.]
+@end enumerate
+
+The first of these is somewhere between a language design and a
+language implementation issue. The latter is a language design issue.
+
 @section @dots{} And This Is Now
 
-Fast forward to 2013.  Where do things stand?
+Fast forward to 2015.  Where do things stand?
 
 @subsection What Awk Has Today
 
@@ -358,7 +398,7 @@ of a standards-compliant version of @command{awk}.
 @item
 There are a number of freely available implementations, with
 different licenses, such that everyone ought to be able to find
-one to suit them:
+a suitable one:
 
 @itemize @bullet
 @item
@@ -385,7 +425,7 @@ in several archive formats:
 @item
 GNU Awk, @command{gawk}, is available from the Free Software Foundation.
 You may use either @command{ftp} or an HTTP downloader:
-@url{http://ftp.gnu.org/gnu/gawk/gawk-4.1.0.tar.gz} is the current
+@url{http://ftp.gnu.org/gnu/gawk/gawk-4.1.3.tar.gz} is the current
 version. There may be a newer one.
 
 @item
@@ -437,6 +477,23 @@ many years (@command{pgawk}).
 Although there is no direct correlation with CPU time used, the
 statement level profiler remains a powerful tool for understanding
 program behavior.
+
+@item
+Since version 4.0, @command{gawk} has had an @samp{@@include} facility
+whereby @command{gawk} goes and finds the named @command{awk} source
+progrm.  For much longer it has searched for files specfied with
+@option{-f} along the path named by the @env{AWKPATH} environment variable.
+The @samp{@@include} mechanism also uses @env{AWKPATH}.
+
+@item
+In terms of getting at the pieces of text matched by a regular expression,
+@command{gawk} provides an optional third argument to the @code{match()}
+function. This argument is an array which @command{gawk} fills in with both
+the matched text for the full regexp and subexpressions, and index and length
+information for use with @code{substr()}.  @command{gawk} also provides the
+@code{gensub()} general substitution function, an enhanced version of the
+@code{split()} function, and the @code{patsplit()} function for specifying
+contents instead of separators using a regexp.
 @end enumerate
 
 With the 4.1 release, all three versions (@command{gawk},
@@ -460,8 +517,8 @@ popularity: PERL, tcl/tk, Python, and Ruby.  We think it is fair to say
 that Python and Ruby are the most popular scripting languages in the
 second decade of the 21st century.
 
-Is @command{awk} now ready to compete with the other languages?
-Not quite yet.
+Is @command{awk}, as we've described it up to this point, now ready to
+compete with the other languages?  Not quite yet.
 
 @section A Key Reason Why Other Languages Have Gained Popularity
 
@@ -473,7 +530,7 @@ One certainly cannot attribute their popularity to improved syntax.
 In the opinion of many, PERL and Ruby both suffer from terrible syntax.
 Tcl's syntax is readable but nothing special. Python's syntax is elegant,
 although slightly unusual.  The point here is that they all differ greatly
-in syntax, and none really offer the clean pattern--action paradigm
+in syntax, and none really offers the clean pattern--action paradigm
 that is @command{awk}'s trademark, yet they are all popular languages.
 
 If not syntax, then what?  We believe that their popularity stems from
@@ -562,6 +619,9 @@ easier, and included an extension for processing XML files in a way that
 fit naturally with the pattern--action paradigm.  While it may not be
 perfect, the @command{gawk} developers feel that it is a good start.
 
+@strong{FIXME}: Henry Spencer suggests adding more info on the API and
+on the design decisions. Comments?
+
 The major @command{xgawk} additions to the C code base have been merged
 into @command{gawk}, and the extensions from that project have been
 rewritten to use the new API.  As a result, the @command{xgawk} project
@@ -583,7 +643,7 @@ to the @command{awk} level via function parameters and/or global variables,
 including associative arrays, which are the only real data structure.
 
 Consider a simple example.  The standard @command{du} program
-can recursively walk one or more arbitrary file heirarchies, call
+can recursively walk one or more arbitrary file hierarchies, call
 @code{stat()} to retrieve file information, and then sum up the blocks
 used.  In the process, @command{du} must track hard links, so that no
 file is accounted for or reported more than once.
@@ -597,7 +657,7 @@ function that returns a linearly-indexed array!)
 
 The @code{fts()} function in the @samp{filefuncs} extension builds on
 @code{stat()} to create a multidimensional array of arrays that describes
-the requested file heirarchies, with each element being an array filled
+the requested file hierarchies, with each element being an array filled
 in by @code{stat()}. Directories are arrays containing elements for each
 directory entry, with an element named @code{"."} for the array itself.
 (The manual page for the @samp{filefuncs} extension is included at the
@@ -617,10 +677,48 @@ The extension facility is new, and undoubtedly has introduced new
 ``dark corners'' into @command{gawk}.  These remain to be uncovered
 and any new bugs need to be shaken out and removed.
 
+Some issues are known and may not be resolvable. For example, 64-bit
+integer values such as the timestamps in @code{stat()} data on modern
+systems don't fit into @command{awk}'s 64-bit double-precision
+numbers which only have 53 bits of significand. This is also a
+problem for the bit-manipulation functions.
+
 From a language design standpoint, a big open issue is some sort of
 ``module'' or more general ``namespace'' facility for @command{awk}.
 We are open to suggestions here and would welcome input from serious
 (or would-be serious) @command{gawk} users on this.
+
+@section Counterpoints
+
+All this is from BWK. Need to summarize and answer it.
+
+I'm not 100% convinced by your basic premise, that the lack of an
+extension mechanism is the main / a big reason why Awk isn't used for
+the kinds of system programming tasks that Perl, Python, etc., are.
+It's absolutely a factor -- without such a mechanism, there's just no
+way to do a lot of important computations.  But how does that trade off
+against just having built-in mechanisms for the core system programming
+facilities (as Perl does) or a handful of core libraries like sys, os,
+regex, etc., for Python?
+
+I'm also not convinced that Awk is the right language for writing
+things that need extensions.  It was originally designed for 1-liners,
+and a lot of its constructs don't scale up to bigger programs.  The
+notation for function locals is appalling (all my fault too, which makes
+it worse).  There's little chance to recover from random spelling
+mistakes and typos; the use of mere adjacency for concatenation looks
+ever more like a bad idea.
+
+Awk is fine for its original purpose, but I find myself writing Python
+for anything that's going to be bigger than say 10-20 lines unless the
+lines are basically just longer pattern-action sequences.  (That
+notation is a win, of course, which you point out.)
+
+The du example is awfully big, though it does show off some of the
+language features.  Could you get the same mileage with something
+quite a bit shorter?
+
+
 
 @section Conclusion
 
