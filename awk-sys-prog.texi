@@ -51,6 +51,10 @@
 @set SUBSECTION subsection
 @end ifplaintext
 
+@tex
+\gdef\urlcolor{0.5 0.09 0.12}
+@end tex
+
 @c For HTML, spell out email addresses, to avoid problems with
 @c address harvesters for spammers.
 @ifhtml
@@ -690,17 +694,45 @@ We are open to suggestions here and would welcome input from serious
 
 @section Counterpoints
 
-All this is from BWK. Need to summarize and answer it.
+Brian Kernighan raised several counterpoints in response to
+an earlier draft of the paper. They are worth addressing (or
+at least trying to):
 
+@quotation
 I'm not 100% convinced by your basic premise, that the lack of an
 extension mechanism is the main / a big reason why Awk isn't used for
 the kinds of system programming tasks that Perl, Python, etc., are.
-It's absolutely a factor -- without such a mechanism, there's just no
+It's absolutely a factor---without such a mechanism, there's just no
 way to do a lot of important computations.  But how does that trade off
 against just having built-in mechanisms for the core system programming
-facilities (as Perl does) or a handful of core libraries like sys, os,
-regex, etc., for Python?
+facilities (as Perl does) or a handful of core libraries like @code{sys},
+@code{os}, @code{regex}, etc., for Python?
+@end quotation
 
+I think that Perl's original inclusion of most of the Unix system calls
+was, @emph{from a language design standpoint}, ultimately a mistake. At
+the time it was first done, there was no other choice: dynamic loading
+of libraries didn't exist on Unix systems in the early and mid-1980s
+(nor did shared libraries, for that matter).  But having all these calls
+bloats the language, making it harder to learn, document, and maintain,
+and I definitely did not wish to go down that path for @command{gawk}.
+
+With respect to Python, the question is: how are those libraries
+implemented? Are they built-in to the interpreter and separated from the
+``core'' language simply by the language design? Or are they dynamically
+loaded modules?
+
+If the latter, that sounds like an argument for the case of having
+extensions, not against it.  And indeed, this merely emphasizes the
+point made at the end of the previous section, which is that to make an
+extension facility really scalable, you also need some sort of namespace /
+module capability.
+
+Thus, Brian may be correct: an extension facility is needed, but the
+last part of the puzzle would be a module facility in the language.
+I continue to think about this.
+
+@quotation
 I'm also not convinced that Awk is the right language for writing
 things that need extensions.  It was originally designed for 1-liners,
 and a lot of its constructs don't scale up to bigger programs.  The
@@ -713,12 +745,41 @@ Awk is fine for its original purpose, but I find myself writing Python
 for anything that's going to be bigger than say 10-20 lines unless the
 lines are basically just longer pattern-action sequences.  (That
 notation is a win, of course, which you point out.)
+@end quotation
 
-The du example is awfully big, though it does show off some of the
+@strong{FIXME}: write something here.
+
+@quotation
+The @command{du} example is awfully big, though it does show off some of the
 language features.  Could you get the same mileage with something
 quite a bit shorter?
+@end quotation
 
+My definition of ``small'' and ``big'' has changed over time. 250 lines
+may be big for a script, but the @command{du.awk} program is much smaller
+that a full implementation in C:  GNU @command{du} is over 1,100 lines
+of C, plus all the libraries it relies upon in the GNU Coreutils.
 
+With respect to shorter examples, I'm not sure. But @command{gawk}
+comes with several useful extensions that are worth exploring,
+and the @code{gawkextlib} project provides more. For example, the
+@code{readdir} extension causes @command{gawk} to read directories
+and return one record per directory entry in an easy-to-parse format,
+instead of exiting with a fatal error:
+
+@example
+$ @kbd{gawk -lreaddir '@{ print @}' .}
+@print{} 2109292/mail.mbx/f
+@print{} 2109295/awk-sys-prog.texi/f
+@print{} 2100007/./d
+@print{} 2100056/texinfo.tex/f
+@print{} 2100055/cleanit/f
+@print{} 2109282/awk-sys-prog.pdf/f
+@print{} 2100009/du.awk/f
+@print{} 2100010/.git/d
+@print{} 2098025/../d
+@print{} 2109294/ChangeLog/f
+@end example
 
 @section Conclusion
 
@@ -743,6 +804,16 @@ lot of time and effort. (We hope not!) Time will tell.
 For now though, we hope that this paper will have piqued @emph{your}
 curiosity, and that you will take the time to give @command{gawk}
 a fresh look.
+
+@appendix Resources
+
+Grey awk book
+
+EAP 4
+
+Online doc
+
+gawkextlib project
 
 @node du in awk
 @appendix Awk Code For @command{du}
