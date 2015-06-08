@@ -155,10 +155,11 @@ have occurred in the Unix/Linux world since 1991.
 It presents a case that @command{gawk}---GNU Awk---fills most of the
 major needs Henry listed way back in 1991, and then describes the
 author's opinion as to why other languages have successfully filled the
-systems programming role which @command{awk} did not.  It ends off
-with a discussion of how the current version of @command{gawk} may
+systems programming role which @command{awk} did not.  It discusses
+how the current version of @command{gawk} may
 finally be able to join the ranks of other popular, powerful, scripting
-languages in common use today.
+languages in common use today, and ends off with some counter-arguments
+and my responses to them.
 
 @subheading Acknowledgements
 
@@ -222,7 +223,7 @@ the earlier Unix licenses.
 
 @item
 PERL@footnote{I've been told that one of the reasons Larry Wall created
-PERL is that he either didn't know about new @command{awk}, or couldn't
+PERL is that he either didn't know about new @command{awk}, or he couldn't
 get it.} existed and was starting to gain in popularity. In 1991,
 ``PERL'' most likely meant PERL 3 or a very early version of PERL 4.
 The World Wide Web, which was one of the major reasons for PERL's growth
@@ -242,9 +243,10 @@ called ``solid.''
 
 @noindent
 The problem with the first of these is that source code was not
-available. And the latter came with (to quote Henry) ``troublesome licenses.''
-Henry no longer remembers whether this referred to the GPL, or to
-the Bell Labs source licenses.
+available. And the latter came with (to quote Henry) ``troublesome
+licenses.''  (Actually, Henry no longer remembers whether his statement
+about ``troublesome licenses'' referred to the GPL, or to the Bell Labs
+source licenses.)
 
 @item
 Michael Brennan's @command{mawk} (also GPL'ed) was @emph{not} yet available.
@@ -624,7 +626,11 @@ fit naturally with the pattern--action paradigm.  While it may not be
 perfect, the @command{gawk} developers feel that it is a good start.
 
 @strong{FIXME}: Henry Spencer suggests adding more info on the API and
-on the design decisions. Comments?
+on the design decisions.
+I think this paper is long enough, and the full doc is quite big.
+It'd be hard to pull API doc into this paper in a reasonable fashion,
+although it would be possible to review some of the design decisions.
+Comments?
 
 The major @command{xgawk} additions to the C code base have been merged
 into @command{gawk}, and the extensions from that project have been
@@ -713,16 +719,17 @@ I think that Perl's original inclusion of most of the Unix system calls
 was, @emph{from a language design standpoint}, ultimately a mistake. At
 the time it was first done, there was no other choice: dynamic loading
 of libraries didn't exist on Unix systems in the early and mid-1980s
-(nor did shared libraries, for that matter).  But having all these calls
-bloats the language, making it harder to learn, document, and maintain,
-and I definitely did not wish to go down that path for @command{gawk}.
+(nor did shared libraries, for that matter).  But having all those
+built-in functions bloats the language, making it harder to learn,
+document, and maintain, and I definitely did not wish to go down that
+path for @command{gawk}.
 
 With respect to Python, the question is: how are those libraries
 implemented? Are they built-in to the interpreter and separated from the
 ``core'' language simply by the language design? Or are they dynamically
 loaded modules?
 
-If the latter, that sounds like an argument for the case of having
+If the latter, that sounds like an argument @emph{for} the case of having
 extensions, not against it.  And indeed, this merely emphasizes the
 point made at the end of the previous section, which is that to make an
 extension facility really scalable, you also need some sort of namespace /
@@ -740,14 +747,30 @@ notation for function locals is appalling (all my fault too, which makes
 it worse).  There's little chance to recover from random spelling
 mistakes and typos; the use of mere adjacency for concatenation looks
 ever more like a bad idea.
+@end quotation
 
+This is hard to argue with.  Nonetheless, @command{gawk}'s @option{--lint}
+option may be of help here, as well as the @option{--dump-variables}
+option which produces a list of all variables used in the program.
+
+@quotation
 Awk is fine for its original purpose, but I find myself writing Python
 for anything that's going to be bigger than say 10-20 lines unless the
 lines are basically just longer pattern-action sequences.  (That
 notation is a win, of course, which you point out.)
 @end quotation
 
-@strong{FIXME}: write something here.
+Since my Python experience is minimal, I have little to say here;
+it might be that if I were more familiar with Python, I would start
+using it for small scripts instead of @command{awk}.
+
+On the other hand, with discipline, it's possible to write fairly
+good-sized, understandable and maintainable @command{awk} programs;
+in my experience @command{awk} does scale up well beyond the one-liner
+range.
+
+Not to mention that Brian published a whole book of @command{awk}
+programs larger than one line. @code{:-)} (See the Resources section.)
 
 @quotation
 The @command{du} example is awfully big, though it does show off some of the
@@ -760,12 +783,14 @@ may be big for a script, but the @command{du.awk} program is much smaller
 that a full implementation in C:  GNU @command{du} is over 1,100 lines
 of C, plus all the libraries it relies upon in the GNU Coreutils.
 
-With respect to shorter examples, I'm not sure. But @command{gawk}
-comes with several useful extensions that are worth exploring,
-and the @code{gawkextlib} project provides more. For example, the
-@code{readdir} extension causes @command{gawk} to read directories
-and return one record per directory entry in an easy-to-parse format,
-instead of exiting with a fatal error:
+With respect to shorter examples, nothing springs to mind immediately.
+However, @command{gawk} comes with several useful extensions that
+are worth exploring, much more than we've covered here.  Also, the
+@code{gawkextlib} project provides some very interesting extensions.
+
+For example, the @code{readdir} extension in the @command{gawk}
+distribution causes @command{gawk} to read directories and return one
+record per directory entry in an easy-to-parse format:
 
 @example
 $ @kbd{gawk -lreaddir '@{ print @}' .}
@@ -780,6 +805,11 @@ $ @kbd{gawk -lreaddir '@{ print @}' .}
 @print{} 2098025/../d
 @print{} 2109294/ChangeLog/f
 @end example
+
+In short, it's too early to really tell. This is the beginning of
+an experiment. I hope it will be a fun journey for me, the other
+@command{gawk} maintainers, and the lareger community of @command{awk}
+users.
 
 @section Conclusion
 

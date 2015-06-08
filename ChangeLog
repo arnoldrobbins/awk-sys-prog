@@ -1,3 +1,8 @@
+2015-06-08         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* awk-sys-prog.texi: Finish incorporating comments.
+	Polish some.  Counterpoints section is still awkward.
+
 2015-06-06         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* awk-sys-prog.texi: Continue incorporating comments.
