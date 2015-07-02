@@ -10,8 +10,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH June 2015
-@set EDITION 0.95
+@set UPDATE-MONTH July 2015
+@set EDITION 0.96
 
 @set TITLE AWK As A Major Systems Programming Language---Revisited
 
@@ -159,23 +159,23 @@ systems programming role which @command{awk} did not.  It discusses
 how the current version of @command{gawk} may
 finally be able to join the ranks of other popular, powerful, scripting
 languages in common use today, and ends off with some counter-arguments
-and my responses to them.
+and the author's responses to them.
 
 @subheading Acknowledgements
 
 Thanks to Andrew Schorr, Henry Spencer, Nelson H.F.@: Beebe, and Brian Kernighan
 for reviewing an earlier draft of this paper.
 
-@section That Was Then @dots{}
+@chapter That Was Then @dots{}
 
 In this @value{SECTION} we review the state of the Unix world in
 1991, as well as the state of @command{awk}, and then list what Henry Spencer
 saw as missing for @command{awk}.
 
-@subsection The Unix World in 1991
+@section The Unix World in 1991
 
 Undoubtedly, many readers of this paper were not using
-computers in 1991, so this @value{SUBSECTION} provides the context
+computers in 1991, so this @value{SECTION} provides the context
 in which Henry's paper was written.  In March of 1991:
 
 @itemize @bullet
@@ -254,7 +254,7 @@ Version 1.0 was accepted for posting in @code{comp.sources.reviewed}
 on September 30, 1991, half a year after Henry's paper was published.
 @end itemize
 
-@subsection What Awk Lacked In 1991
+@section What Awk Lacked In 1991
 
 Here is a summary of what was wrong with the @command{awk} picture
 in 1991.  These are in the same order as presented Henry's paper.
@@ -338,11 +338,11 @@ it has one.]
 The first of these is somewhere between a language design and a
 language implementation issue. The latter is a language design issue.
 
-@section @dots{} And This Is Now
+@chapter @dots{} And This Is Now
 
 Fast forward to 2015.  Where do things stand?
 
-@subsection What Awk Has Today
+@section What Awk Has Today
 
 The state of the @command{awk} world is much better now.
 In the same order:
@@ -464,7 +464,7 @@ Wikipedia article}, and also the
 
 @end enumerate
 
-@subsection And What GNU Awk Has Today
+@section And What GNU Awk Has Today
 
 The more difficult of the quality of implementation issues are addressed
 by @command{gawk}.  In particular:
@@ -514,7 +514,7 @@ execution engine and internal improvements in array indexing).
 And @command{gawk} clearly has the most features of any version,
 many of which considerably increase the power of the language.
 
-@subsection So Where Does Awk Stand?
+@section So Where Does Awk Stand?
 
 Despite all of the above, @command{gawk} is not as popular as other
 scripting languages. Since 1991, we can point to four major scripting
@@ -526,7 +526,7 @@ second decade of the 21st century.
 Is @command{awk}, as we've described it up to this point, now ready to
 compete with the other languages?  Not quite yet.
 
-@section A Key Reason Why Other Languages Have Gained Popularity
+@chapter A Key Reason Why Other Languages Have Gained Popularity
 
 In retrospect, it seems clear (at least to us!) that @emph{the} major
 reason that all of the previously mentioned languages have enjoyed
@@ -558,12 +558,12 @@ To summarize: A reasonable language definition, efficient implementations,
 debuggers and profilers are necessary but not sufficient for true power.
 The final ingredient is @emph{extensibility}.
 
-@section Filling The Gap
+@chapter Filling The Gap
 
 With version 4.1, @command{gawk} (finally) provides a defined C API
 for extending the core language.
 
-@subsection API Overview
+@section API Overview
 
 The API makes it possible to write functions in C or C++ that are
 callable from an @command{awk} program as if the function were
@@ -609,7 +609,7 @@ pipelines with @command{gawk}'s @samp{|&} operator.
 
 @end itemize
 
-@subsection Discussion
+@section Discussion
 
 Considerable thought went into the design of the API.
 The @command{gawk} documentation provides a
@@ -681,7 +681,7 @@ day support MinGW also.}, in @command{awk}.  @xref{du in awk}, for the
 code, which weighs in at under 250 lines.  Much of this is comments and
 argument parsing.
 
-@subsection Future Work
+@section Future Work
 
 The extension facility is new, and undoubtedly has introduced new
 ``dark corners'' into @command{gawk}.  These remain to be uncovered
@@ -698,7 +698,7 @@ From a language design standpoint, a big open issue is some sort of
 We are open to suggestions here and would welcome input from serious
 (or would-be serious) @command{gawk} users on this.
 
-@section Counterpoints
+@chapter Counterpoints
 
 Brian Kernighan raised several counterpoints in response to
 an earlier draft of the paper. They are worth addressing (or
@@ -806,12 +806,14 @@ $ @kbd{gawk -lreaddir '@{ print @}' .}
 @print{} 2109294/ChangeLog/f
 @end example
 
+How cool is that?!? @code{:-)}
+
 In short, it's too early to really tell. This is the beginning of
 an experiment. I hope it will be a fun journey for me, the other
-@command{gawk} maintainers, and the lareger community of @command{awk}
+@command{gawk} maintainers, and the larger community of @command{awk}
 users.
 
-@section Conclusion
+@chapter Conclusion
 
 It has taken much longer than any @command{awk} fan would like, but finally,
 GNU Awk fills in almost all the gaps listed by Henry Spencer for
@@ -837,13 +839,27 @@ a fresh look.
 
 @appendix Resources
 
-Grey awk book
+@enumerate
+@item
+@cite{The AWK Programming Language Paperback},
+Alfred V. Aho, Brian W. Kernighan, and Peter J. Weinberger.
+Addison-Wesley, 1988.
+ISBN-13: 978-0201079814, ISBN-10: 020107981X.
 
-EAP 4
+@item
+@cite{Effective awk Programming}, fourth edition.
+Arnold Robbins.
+O'Reilly Media, 2015.
+ISBN-13: 978-1491904619, ISBN-10: 1491904615.
 
-Online doc
+@item
+Online version of the @command{gawk} documentation:
+@uref{http://www.gnu.org/software/gawk/manual/}.
 
-gawkextlib project
+@item
+The @code{gawkextlib} project:
+@uref{http://sourceforge.net/projects/gawkextlib/}.
+@end enumerate
 
 @node du in awk
 @appendix Awk Code For @command{du}

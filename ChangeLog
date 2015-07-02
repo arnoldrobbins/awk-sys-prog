@@ -1,3 +1,8 @@
+2015-07-03         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* awk-sys-prog.texi: Fix sectioning. Further cleanup edits.
+	Bump version and date.
+
 2015-06-08         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* awk-sys-prog.texi: Finish incorporating comments.
