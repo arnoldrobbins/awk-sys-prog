@@ -1,3 +1,8 @@
+2018-02-22         Arnold D. Robbins     <arnold@skeeve.com>
+
+	* README.md: New file.
+	* texinfo.tex: Updated.
+
 2015-07-03         Arnold D. Robbins     <arnold@skeeve.com>
 
 	* awk-sys-prog.texi: Fix sectioning. Further cleanup edits.
