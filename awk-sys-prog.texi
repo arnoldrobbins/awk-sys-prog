@@ -10,8 +10,8 @@
 @c This sets the edition of the document.
 
 @c These apply across the board.
-@set UPDATE-MONTH July 2015
-@set EDITION 0.96
+@set UPDATE-MONTH March 2018
+@set EDITION 0.97
 
 @set TITLE AWK As A Major Systems Programming Language---Revisited
 
@@ -92,7 +92,7 @@
 @end iftex
 
 @copying
-Copyright @copyright{} 2013, 2015
+Copyright @copyright{} 2013, 2015, 2018
 Arnold David Robbins
 
 All Rights Reserved.
@@ -130,6 +130,26 @@ URL: @uref{http://www.skeeve.com/} @*
 @insertcopying
 @end titlepage
 
+@unnumbered Preface
+
+I started this paper in 2013, and in 2015 sent it out for review to the people
+listed later on.  After incorporating comments, I sent it to Rik Farrow, the
+editor of the USENIX magazine @cite{;login:} to see if he would publish it.
+He declined to do so, for reasonably good reasons.
+
+The paper languished, forgotten, until early 2018 when I came across it and
+decided to polish it off, put it up on GitHub, and make it available from
+my home page in HTML.
+
+If you are interested in language design and evolution in general, and in Awk
+in particular, I hope you will enjoy reading this paper.  If not, then why
+are you bothering looking at it now?
+
+@noindent
+Arnold Robbins @*
+Nof Ayalon, ISRAEL @*
+March, 2018
+
 @chapter Introduction
 
 At the March 1991 USENIX conference, Henry Spencer presented a paper
@@ -137,7 +157,8 @@ entitled @cite{AWK As A Major Systems Programming Language}.  In it,
 he described his experiences using the original version of @command{awk}
 to write two significant ``systems'' programs---a clone for a reasonable
 subset of the @command{nroff} formatter@footnote{The Amazingly Workable
-Formatter, @command{awf}, is available from @uref{http://awk.info/?tools/awk}.},
+Formatter, @command{awf}, is available from
+@uref{ftp://ftp.freefriends.org/arnold/Awkstuff/awf.tgz}.},
 and a simple parser generator.
 
 He described what @command{awk} did well, as well as what it didn't, and
@@ -200,7 +221,7 @@ and AT&T was itself trying to succeed in the Unix hardware market.
 GNU/Linux did not exist!  Some unencumbered BSD variants were available,
 but they were still under the cloud of the AT&T/UCB law suit.@footnote{See
 the @uref{http://en.wikipedia.org/wiki/USL_v._BSDi, Wikipedia article},
-and @uref{http://cm.bell-labs.com/who/dmr/bsdi/bsdisuit.html,
+and @uref{https://www.bell-labs.com/usr/dmr/www/bsdi/bsdisuit.html,
 some notes at the late Dennis Ritchie's website}. There are undoubtedly
 other sources of information as well.}
 
@@ -308,7 +329,7 @@ There is no @command{awk}-level profiler.
 (Support tool or quality of implementation issue.)
 @end enumerate
 
-In recent private email, Henry added the following items, saying
+In private email, Henry added the following items, saying
 ``there are a couple more things I'd add now, in hindsight.''
 These are direct quotes:
 
@@ -340,7 +361,7 @@ language implementation issue. The latter is a language design issue.
 
 @chapter @dots{} And This Is Now
 
-Fast forward to 2015.  Where do things stand?
+Fast forward to 2018.  Where do things stand?
 
 @section What Awk Has Today
 
@@ -359,7 +380,7 @@ is some version of new @command{awk}.
 There remains no way to tell @command{awk} to start matching all its
 patterns over again against the existing @code{$0}.  Furthermore,
 this is a feature that has not been called for by the @command{awk}
-community, except in Henry's paper.  (We do acknowledge that this would
+community, except in Henry's paper.  (We do acknowledge that this might
 be a useful feature.)
 
 @item
@@ -374,7 +395,7 @@ function copy_array(dest, source,   i, count)
     delete dest
 
     for (i in source) @{
-        if (isarray(source[i]))
+        if (typeof(source[i]) == "array")
             count += copy_array(dest[i], source[i])
         else @{
             dest[i] = source[i]
@@ -431,7 +452,7 @@ in several archive formats:
 @item
 GNU Awk, @command{gawk}, is available from the Free Software Foundation.
 You may use either @command{ftp} or an HTTP downloader:
-@url{http://ftp.gnu.org/gnu/gawk/gawk-4.1.3.tar.gz} is the current
+@url{http://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz} is the current
 version. There may be a newer one.
 
 @item
@@ -441,6 +462,9 @@ Basic information is available on
 @uref{http://www.invisible-island.net/mawk, the project's web page}.
 The download URL is
 @url{http://invisible-island.net/datafiles/release/mawk.tar.gz}.
+
+In 2017 Michael published a beta of @command{mawk} 2.0. It's available from
+the project's @uref{https://github.com/mikebrennan000/mawk-2, GitHub page}.
 
 @item
 MKS Awk was used for Solaris's @file{/usr/xpg4/bin/awk}, which is
@@ -487,7 +511,7 @@ program behavior.
 @item
 Since version 4.0, @command{gawk} has had an @samp{@@include} facility
 whereby @command{gawk} goes and finds the named @command{awk} source
-progrm.  For much longer it has searched for files specfied with
+progrm.  For much longer it has searched for files specified with
 @option{-f} along the path named by the @env{AWKPATH} environment variable.
 The @samp{@@include} mechanism also uses @env{AWKPATH}.
 
@@ -526,11 +550,12 @@ second decade of the 21st century.
 Is @command{awk}, as we've described it up to this point, now ready to
 compete with the other languages?  Not quite yet.
 
-@chapter A Key Reason Why Other Languages Have Gained Popularity
+@chapter Key Reasons Why Other Languages Have Gained Popularity
 
-In retrospect, it seems clear (at least to us!) that @emph{the} major
-reason that all of the previously mentioned languages have enjoyed
-significant popularity is their @emph{extensibility}.
+In retrospect, it seems clear (at least to us!) that there are two
+major reasons that all of the previously mentioned languages have enjoyed
+significant popularity. The first is their @emph{extensibility}.
+The second is @emph{namespace management}.
 
 One certainly cannot attribute their popularity to improved syntax.
 In the opinion of many, PERL and Ruby both suffer from terrible syntax.
@@ -544,6 +569,9 @@ the fact that all of these languages are easily @emph{extensible}. This is true
 with both ``modules'' in the scripting language, and more importantly,
 with access to C level facilities via dynamic library loading.
 
+Furthermore, these languages allow you to group related functions and 
+variables into packages or modules: they let you manage the namespace.
+
 @command{awk}, on the other hand, has always been closed. An @command{awk}
 program cannot even change its working directory, much less open
 a connection to an SQL database or a socket to a server on the
@@ -554,11 +582,15 @@ or for Python such as PyQt or the Python tk bindings, it becomes
 clear that extensibility is the real key to power (and from there
 to popularity).
 
+Furthermore, in @command{awk}, all global variables and functions
+share a single namespace. This prevents many good software development
+practices based on the principle of information hiding.
+
 To summarize: A reasonable language definition, efficient implementations,
 debuggers and profilers are necessary but not sufficient for true power.
-The final ingredient is @emph{extensibility}.
+The final ingredients are @emph{extensibility} and @emph{namespaces}.
 
-@chapter Filling The Gap
+@chapter Filling The Extensibility Gap
 
 With version 4.1, @command{gawk} (finally) provides a defined C API
 for extending the core language.
@@ -603,7 +635,7 @@ the same as the C @code{atexit()} function.
 @item
 Hooks into the built-in I/O redirection mechanisms in @command{gawk}.
 In particular, there are separate facilities for input redirections
-with @code{getlne} and @samp{<}, output redirections with
+with @code{getline} and @samp{<}, output redirections with
 @code{print} or @code{printf} and @samp{>} or @samp{>>}, and two-way
 pipelines with @command{gawk}'s @samp{|&} operator.
 
@@ -670,8 +702,6 @@ The @code{fts()} function in the @samp{filefuncs} extension builds on
 the requested file hierarchies, with each element being an array filled
 in by @code{stat()}. Directories are arrays containing elements for each
 directory entry, with an element named @code{"."} for the array itself.
-(The manual page for the @samp{filefuncs} extension is included at the
-end of this document to make this clearer.)
 
 Given that @code{fts()} does the heavy lifting, @command{du} can be
 written quite nicely, and quite portably@footnote{The @command{awk}
@@ -683,7 +713,7 @@ argument parsing.
 
 @section Future Work
 
-The extension facility is new, and undoubtedly has introduced new
+The extension facility is relatively new, and undoubtedly has introduced new
 ``dark corners'' into @command{gawk}.  These remain to be uncovered
 and any new bugs need to be shaken out and removed.
 
@@ -693,10 +723,14 @@ systems don't fit into @command{awk}'s 64-bit double-precision
 numbers which only have 53 bits of significand. This is also a
 problem for the bit-manipulation functions.
 
-From a language design standpoint, a big open issue is some sort of
-``module'' or more general ``namespace'' facility for @command{awk}.
-We are open to suggestions here and would welcome input from serious
-(or would-be serious) @command{gawk} users on this.
+With respect to namespaces, in 2017 I (finally) figured out how
+namespaces in @command{awk} ought to work to provide the needed
+functionality while retaining backwards compatibility.
+The code is currently in the @code{feature/namespaces} branch
+of @command{gawk}'s Git repository. It will eventually be merged
+into the @code{master} branch for release as part of @command{gawk} 5.0.
+
+@strong{FIXME}: More info needed here.
 
 @chapter Counterpoints
 
@@ -735,9 +769,10 @@ point made at the end of the previous section, which is that to make an
 extension facility really scalable, you also need some sort of namespace /
 module capability.
 
-Thus, Brian may be correct: an extension facility is needed, but the
+Thus, Brian is correct: an extension facility is needed, but the
 last part of the puzzle would be a module facility in the language.
-I continue to think about this.
+I think that I have solved this, and invite the curious reader to
+checkout the branch named earlier and provide feedback.
 
 @quotation
 I'm also not convinced that Awk is the right language for writing
@@ -772,6 +807,31 @@ range.
 Not to mention that Brian published a whole book of @command{awk}
 programs larger than one line. @code{:-)} (See the Resources section.)
 
+Some of my own, good-sized @command{awk} programs are available
+from GitHub:
+
+@table @asis
+@item The TexiWeb Jr.@: literate programming system
+See @uref{https://github.com/arnoldrobbins/texiwebjr}.
+The suite has two programs that total over 1,300 lines
+of @command{awk}. (They share some code.)
+
+@item Prepinfo
+See @uref{https://github.com/arnoldrobbins/prepinfo}.
+This script processes Texinfo files, updating menus
+as needed. This version is rewritten in TexiWeb Jr.@:; it's
+about 350 lines of @command{awk}.
+
+@item Sortmail
+See @uref{https://github.com/arnoldrobbins/sortmail}.
+This script sorts a Unix mbox format mailbox by thread.
+I use it daily.  It's also written in TexiWeb Jr.@: and
+is about 330 lines of @command{awk}.
+
+@end table
+
+Brian continues:
+
 @quotation
 The @command{du} example is awfully big, though it does show off some of the
 language features.  Could you get the same mileage with something
@@ -780,13 +840,12 @@ quite a bit shorter?
 
 My definition of ``small'' and ``big'' has changed over time. 250 lines
 may be big for a script, but the @command{du.awk} program is much smaller
-that a full implementation in C:  GNU @command{du} is over 1,100 lines
+than a full implementation in C:  GNU @command{du} is over 1,100 lines
 of C, plus all the libraries it relies upon in the GNU Coreutils.
 
 With respect to shorter examples, nothing springs to mind immediately.
 However, @command{gawk} comes with several useful extensions that
-are worth exploring, much more than we've covered here.  Also, the
-@code{gawkextlib} project provides some very interesting extensions.
+are worth exploring, much more than we've covered here.
 
 For example, the @code{readdir} extension in the @command{gawk}
 distribution causes @command{gawk} to read directories and return one
@@ -808,6 +867,10 @@ $ @kbd{gawk -lreaddir '@{ print @}' .}
 
 How cool is that?!? @code{:-)}
 
+Also, the @code{gawkextlib} project provides some very interesting
+extensions.  Of particular interest are the XML and JSON extensions,
+but there are a number of others, and it's worth checking out.
+
 In short, it's too early to really tell. This is the beginning of
 an experiment. I hope it will be a fun journey for me, the other
 @command{gawk} maintainers, and the larger community of @command{awk}
@@ -820,12 +883,13 @@ GNU Awk fills in almost all the gaps listed by Henry Spencer for
 @command{awk} to be really useful as a systems programming language.
 
 In addition, experience from other popular languages has shown that
-extensibility is a key, if not @emph{the} key, to true power,
+extensibility and namespaces are the keys to true power,
 usability, and popularity.
 
 With the release of @command{gawk} 4.1, we feel that @command{gawk}
-(and thus the Awk language) are now on par with the basic capabilities
-of other popular languages.
+(and thus the Awk language) are now almost on par with the basic capabilities
+of other popular languages. With @command{gawk} 5.0, we hope to truly
+reach par.
 
 Is it too late in the game?
 If enough people start to write extensions for @command{gawk},
